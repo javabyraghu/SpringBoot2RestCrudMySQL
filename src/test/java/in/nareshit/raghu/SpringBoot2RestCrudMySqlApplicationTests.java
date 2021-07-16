@@ -3,6 +3,7 @@ package in.nareshit.raghu;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -72,10 +73,62 @@ public class SpringBoot2RestCrudMySqlApplicationTests {
 
 	}
 
+	//get One successs
+	@Test
+	@DisplayName("TEST EMPLOYEE GET ONE ")
+	@Order(3)
+	public void testEmployeeGetOne() throws Exception {
+		MockHttpServletRequestBuilder request = 
+				MockMvcRequestBuilders.get("/api/employees/one/{id}",1);
+
+		MvcResult result = mockMvc.perform(request).andReturn();
+		MockHttpServletResponse response = result.getResponse();
+		assertEquals(HttpStatus.OK.value(), response.getStatus());
+	}
+
+	//get one fail
+	@Test
+	@DisplayName("TEST EMPLOYEE GET ONE NOT FOUND")
+	@Order(4)
+	public void testEmployeeGetOneNotFound() throws Exception {
+		MockHttpServletRequestBuilder request = 
+				MockMvcRequestBuilders.get("/api/employees/one/{id}",990);
+
+		MvcResult result = mockMvc.perform(request).andReturn();
+		MockHttpServletResponse response = result.getResponse();
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
+	}
+
+
+	@Test
+	@DisplayName("EMPLOYEE UPDATE TEST")
+	@Order(5)
+	public void testEmployeeUpdate() throws Exception {
+		//a. Create Http Request using Mock
+		MockHttpServletRequestBuilder request =
+				MockMvcRequestBuilders
+				.put("/api/employees/update")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("{\"empId\":1, \"empName\" : \"SAM NEW\", \"empSal\": 6000.0, \"empDept\" : \"TQA\" }");
+
+		//b. Execute Request and Read Result
+		MvcResult result = mockMvc.perform(request).andReturn();
+
+		//c. Read response from Result
+		MockHttpServletResponse response = result.getResponse();
+
+		//d. Validate Response.
+		assertEquals(HttpStatus.OK.value(), response.getStatus());
+		if(!response.getContentAsString().contains("updated")) {
+			fail("UPDATE IS NOT WORKING PROPERLY !!");
+		}
+	}
+	
 
 	@Test
 	@DisplayName("EMPLOYEE DELETE TEST")
-	@Order(3)
+	@Order(6)
+	@Disabled
 	public void testEmployeeDelete() throws Exception {
 		//a. Create Http Request using Mock
 		MockHttpServletRequestBuilder request =
@@ -92,6 +145,19 @@ public class SpringBoot2RestCrudMySqlApplicationTests {
 		if(!response.getContentAsString().contains("Deleted")) {
 			fail(" Record not deleted!");
 		}
+	}
+
+
+	@Test
+	@DisplayName("EMPLOYEE DELETE NOT FOUND TEST")
+	@Order(7)
+	public void testEmployeeDeleteNotFound() throws Exception {
+		MockHttpServletRequestBuilder request =
+				MockMvcRequestBuilders.delete("/api/employees/remove/{id}",990);
+
+		MvcResult result = mockMvc.perform(request).andReturn();
+		MockHttpServletResponse response = result.getResponse();
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
 	}
 
 }
